@@ -632,19 +632,23 @@ function createKeymapEl() {
   heading.textContent = '⌨';
   bar.appendChild(heading);
 
-  const tabDefs = [
-    { id: 'tabAll',      label: TAB_LABELS.tabAll },
-    { id: 'tabImages',   label: TAB_LABELS.tabImages },
-    { id: 'tabVideos',   label: TAB_LABELS.tabVideos },
-    { id: 'tabMaps',     label: TAB_LABELS.tabMaps },
-    { id: 'tabShopping', label: TAB_LABELS.tabShopping },
-    { id: 'tabNews',     label: TAB_LABELS.tabNews },
+  const allDefs = [
+    { id: 'nextSuggestion', label: '候補↓' },
+    { id: 'prevSuggestion', label: '候補↑' },
+    { id: 'tabAll',         label: TAB_LABELS.tabAll },
+    { id: 'tabImages',      label: TAB_LABELS.tabImages },
+    { id: 'tabVideos',      label: TAB_LABELS.tabVideos },
+    { id: 'tabMaps',        label: TAB_LABELS.tabMaps },
+    { id: 'tabShopping',    label: TAB_LABELS.tabShopping },
+    { id: 'tabNews',        label: TAB_LABELS.tabNews },
+    { id: 'nextPage',       label: '次ページ' },
+    { id: 'prevPage',       label: '前ページ' },
   ];
 
-  for (const { id, label } of tabDefs) {
+  for (const { id, label } of allDefs) {
     const item = document.createElement('span');
     item.className = 'kws-item';
-    item.dataset.tabId = id;
+    item.dataset.keyId = id;
 
     const keyBadge = document.createElement('span');
     keyBadge.className = 'kws-key';
@@ -670,7 +674,7 @@ function updateKeymapEl() {
   if (!bar) return;
 
   for (const item of bar.querySelectorAll('.kws-item')) {
-    const id = item.dataset.tabId;
+    const id = item.dataset.keyId;
     const badge = item.querySelector('.kws-key');
     if (badge && id) {
       badge.textContent = keys[id] || DEFAULT_KEYS[id];

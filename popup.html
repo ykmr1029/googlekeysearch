@@ -17,7 +17,17 @@
       color: #202124;
       background: #fff;
       width: 320px;
+      max-height: 560px;
       padding: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
     }
 
     h1 {
@@ -129,6 +139,7 @@
       display: flex;
       gap: 8px;
       margin-top: 12px;
+      flex-shrink: 0;
     }
 
     button {
@@ -165,14 +176,16 @@
   <h1>⌨️ GoogleKeySearch</h1>
   <p class="subtitle">キーをクリックして新しいキーを押すと変更できます</p>
 
-  <div class="section-title">検索候補</div>
-  <div id="suggestionKeys"></div>
+  <div class="scroll-area">
+    <div class="section-title">検索候補</div>
+    <div id="suggestionKeys"></div>
 
-  <div class="section-title">タブ切り替え</div>
-  <div id="tabKeys"></div>
+    <div class="section-title">タブ切り替え</div>
+    <div id="tabKeys"></div>
 
-  <div class="section-title">ページ送り</div>
-  <div id="pageKeys"></div>
+    <div class="section-title">ページ送り</div>
+    <div id="pageKeys"></div>
+  </div>
 
   <div id="status"></div>
 
