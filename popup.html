@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoogleKeySearch 設定</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      font-size: 13px;
+      color: #202124;
+      background: #fff;
+      width: 320px;
+      padding: 16px;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a73e8;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #5f6368;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #5f6368;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 12px 0 8px;
+    }
+
+    .key-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    .key-row:last-child {
+      border-bottom: none;
+    }
+
+    .key-label {
+      color: #3c4043;
+      flex: 1;
+    }
+
+    .key-input-wrapper {
+      position: relative;
+    }
+
+    .key-input {
+      width: 44px;
+      height: 28px;
+      border: 1.5px solid #dadce0;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+      font-family: "SF Mono", "Consolas", monospace;
+      font-weight: 600;
+      color: #202124;
+      background: #f8f9fa;
+      cursor: pointer;
+      outline: none;
+      caret-color: transparent;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+
+    .key-input:focus {
+      border-color: #1a73e8;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
+    }
+
+    .key-input.capturing {
+      border-color: #1a73e8;
+      background: #e8f0fe;
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    .key-input.duplicate {
+      border-color: #d93025;
+      background: #fce8e6;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2); }
+      50%       { box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.3); }
+    }
+
+    .hint {
+      font-size: 10px;
+      color: #9aa0a6;
+      margin-top: 2px;
+      text-align: center;
+    }
+
+    #status {
+      font-size: 11px;
+      min-height: 16px;
+      margin-top: 12px;
+      text-align: center;
+      color: #188038;
+      transition: opacity 0.3s;
+    }
+
+    #status.error {
+      color: #d93025;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    button {
+      flex: 1;
+      height: 32px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #saveBtn {
+      background: #1a73e8;
+      color: #fff;
+    }
+
+    #saveBtn:hover {
+      background: #1557b0;
+    }
+
+    #resetBtn {
+      background: #f1f3f4;
+      color: #3c4043;
+    }
+
+    #resetBtn:hover {
+      background: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <h1>⌨️ GoogleKeySearch</h1>
+  <p class="subtitle">キーをクリックして新しいキーを押すと変更できます</p>
+
+  <div class="section-title">検索候補</div>
+  <div id="suggestionKeys"></div>
+
+  <div class="section-title">タブ切り替え</div>
+  <div id="tabKeys"></div>
+
+  <div class="section-title">ページ送り</div>
+  <div id="pageKeys"></div>
+
+  <div id="status"></div>
+
+  <div class="buttons">
+    <button id="resetBtn">デフォルトに戻す</button>
+    <button id="saveBtn">保存</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

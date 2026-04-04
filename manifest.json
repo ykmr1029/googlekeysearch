@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "GoogleKeySearch",
+  "version": "1.0.0",
+  "description": "Google検索をキーボードショートカットで便利に操作できます",
+  "permissions": ["storage", "tabs"],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.google.com/*",
+        "*://www.google.co.jp/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "GoogleKeySearch 設定"
+  }
+}
