@@ -351,7 +351,15 @@ function navigateResult(direction) {
   const selected = results[resultNavIndex];
   if (selected) {
     selected.classList.add('kws-result-selected');
-    selected.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // 先頭はページ最上部、末尾はページ最下部までスクロール
+    if (resultNavIndex === 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (resultNavIndex === results.length - 1) {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    } else {
+      selected.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 }
 
