@@ -170,6 +170,15 @@ function getSearchInput() {
  * 表示中の候補リストアイテムを返す。
  * Google の KeyboardEvent は isTrusted=false だと無視されることがあるため、
  * DOM を直接操作して候補ナビゲーションを行う。
+ *
+ * Google の候補 DOM は以下のような入れ子になることがある:
+ *   <div role="option">          ← グループコンテナ（複数候補をまとめる）
+ *     <li role="option">...</li> ← 個別候補アイテム
+ *     <li role="option">...</li>
+ *   </div>
+ * querySelectorAll で全子孫を取得すると親コンテナも含まれ、
+ * コンテナ選択時に複数候補がまとめてハイライトされてしまう。
+ * そのため、子孫に role="option" を持たないリーフノードのみを対象とする。
  */
 function getSuggestionItems() {
   const listboxSelectors = [
@@ -183,12 +192,15 @@ function getSuggestionItems() {
     const cs = window.getComputedStyle(listbox);
     if (cs.display === 'none' || cs.visibility === 'hidden') continue;
 
-    // role="option" が標準だが li も試す
-    const items = [
-      ...listbox.querySelectorAll('[role="option"]'),
-    ].filter((el) => el.offsetParent !== null && el.offsetHeight > 0);
+    const allOptions = [...listbox.querySelectorAll('[role="option"]')]
+      .filter((el) => el.offsetParent !== null && el.offsetHeight > 0);
 
-    if (items.length > 0) return items;
+    // 子孫に role="option" を持たないリーフノードを優先する
+    const leafItems = allOptions.filter((el) => !el.querySelector('[role="option"]'));
+    if (leafItems.length > 0) return leafItems;
+
+    // リーフノードが見つからない場合は全候補を返す（フォールバック）
+    if (allOptions.length > 0) return allOptions;
   }
   return [];
 }
@@ -273,24 +285,46 @@ function navigateSuggestion(direction) {
 /**
  * Google 検索結果の各カードを取得する
  * Google の DOM は頻繁に変わるため、複数セレクタでフォールバック
+ *
+ * 2026年現在の Google DOM 構造:
+ *   <div class="tF2Cxc">          ← 各検索結果コンテナ（旧 .g は廃止）
+ *     <div class="yuRUbf">
+ *       <a class="zReHs">
+ *         <h3 class="LC20lb ...">タイトル</h3>  ← メインタイトル
+ *       </a>
+ *     </div>
+ *     <table class="jmjoTe">      ← サイトリンク（存在する場合のみ）
+ *       <h3 class="QnNiCc">...</h3>  ← サイトリンクの見出し
+ *     </table>
+ *   </div>
+ *
+ * メインタイトルは h3.LC20lb、サイトリンク見出しは h3.QnNiCc で区別できる。
+ * tF2Cxc かつ h3.LC20lb を持つ要素が各検索結果カード。
  */
 function getSearchResults() {
-  const rso = document.querySelector('#rso');
-  if (!rso) return [];
+  // 手段 1: 現行 Google DOM — tF2Cxc がコンテナクラス、h3.LC20lb がメインタイトル
+  let results = [...document.querySelectorAll('div.tF2Cxc')]
+    .filter((el) => el.querySelector('h3.LC20lb'));
 
-  // 手段 1: 伝統的な .g クラス（入れ子は除外）
-  let results = [...rso.querySelectorAll('.g:not(.g .g)')];
-
-  // 手段 2: h3 を含む data-hveid 要素（最上位のみ）
-  if (results.length < 2) {
-    results = [...rso.querySelectorAll('[data-hveid]')].filter(
-      (el) => el.querySelector('h3') && !el.closest('[data-hveid] [data-hveid]')
-    );
+  if (results.length >= 2) {
+    return results.filter((el) => el.getBoundingClientRect().height > 40);
   }
 
-  // 手段 3: #rso の直接の子で h3 を持つもの
-  if (results.length < 2) {
-    results = [...rso.children].filter((el) => el.querySelector('a h3, h3 a'));
+  // 手段 2: #rso 内の .g（旧 DOM 向けフォールバック）
+  const rso = document.querySelector('#rso');
+  if (rso) {
+    results = [...rso.querySelectorAll('.g')]
+      .filter((el) => !el.querySelector('.g'));
+
+    if (results.length < 2) {
+      results = [...rso.querySelectorAll('[data-hveid]')].filter(
+        (el) => el.querySelector('h3') && !el.closest('[data-hveid] [data-hveid]')
+      );
+    }
+
+    if (results.length < 2) {
+      results = [...rso.children].filter((el) => el.querySelector('a h3, h3 a'));
+    }
   }
 
   // 高さが十分あるものだけを対象にする（広告バナー等を除外）
@@ -329,11 +363,12 @@ function openSelectedResult() {
   const selected = results[resultNavIndex];
   if (!selected) return;
 
-  // h3 を含む <a> がメインのタイトルリンク
+  // メインタイトルリンクを取得（a.zReHs が現行 Google の標準クラス）
   const titleLink =
-    selected.querySelector('a:has(h3)') ||
-    selected.querySelector('h3')?.closest('a') ||
-    selected.querySelector('.yuRUbf a, .DKV0Md a') ||
+    selected.querySelector('a.zReHs') ||
+    selected.querySelector('h3.LC20lb')?.closest('a') ||
+    selected.querySelector('a:has(h3.LC20lb)') ||
+    selected.querySelector('.yuRUbf a') ||
     selected.querySelector('a[href^="http"], a[href^="/url"]');
 
   if (titleLink) titleLink.click();
